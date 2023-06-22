@@ -21,7 +21,8 @@ import { useContext } from "react";
 import { Userctx } from "../store/userContext";
 import { useRoute } from "@react-navigation/native";
 import { ActivityIndicator } from "react-native-paper";
-import * as FileSystem from "expo-file-system";
+import * as Notifications from "expo-notifications";
+
 // const messages = [
 //   {
 //     id: 1,
@@ -96,7 +97,33 @@ import * as FileSystem from "expo-file-system";
 //     isadmin: false,
 //   },
 // ];
-export default function ChatScreen() {
+function generateDate() {
+  const now = new Date();
+
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+  const seconds = String(now.getSeconds()).padStart(2, "0");
+
+  const formattedTime = `${hours}:${minutes}:${seconds}`;
+  return formattedTime;
+}
+function generateRandomSoundName() {
+  var currentDate = new Date();
+  var timestamp = currentDate.getTime();
+  var randomValue = Math.floor(Math.random() * 10000);
+  var soundName = "sound_" + timestamp + "_" + randomValue + ".m4a";
+
+  return soundName;
+}
+function generateRandomImageName() {
+  var currentDate = new Date();
+  var timestamp = currentDate.getTime();
+  var randomValue = Math.floor(Math.random() * 10000);
+  var soundName = "image_" + timestamp + "_" + randomValue;
+
+  return soundName;
+}
+export default function ChatScreen(props) {
   const [messageText, setmessageText] = useState();
   const [recording, setRecording] = useState();
   const [image, setimage] = useState();
@@ -110,7 +137,17 @@ export default function ChatScreen() {
   const uctx = useContext(Userctx);
   const [isSending, setisSending] = useState(false);
   const { params } = useRoute();
+  const flatlistRef = useRef();
   const [shouldCreateNewIQ, setshouldCreateNewIQ] = useState(false);
+  const sendNotification = useCallback(async (message) => {
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: "New Message",
+        body: message,
+      },
+      trigger: null, // Send immediately
+    });
+  }, []);
   useEffect(() => {
     //checkchatHistory for InquiryID
     setisloadingChat((p) => true);
@@ -165,7 +202,10 @@ export default function ChatScreen() {
       headers: { "Content-Type": "multipart/form-data" },
       body: gform,
     })
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw "Error Occured";
+        return r.json();
+      })
       .then((d) => {
         console.log(d);
         setinquiryId((p) => d.q_id);
@@ -176,7 +216,7 @@ export default function ChatScreen() {
       .finally((f) => {
         setisloadingChat((p) => false);
       });
-  }, [uctx, shouldCreateNewIQ]);
+  }, [shouldCreateNewIQ]);
   useEffect(() => {
     setisloadingChat((p) => true);
 
@@ -199,7 +239,14 @@ export default function ChatScreen() {
         setchatMessages((p) => d?.data);
       })
       .catch((e) => {
-        return Alert.alert("Error", "Couldnt Load Your Text Messages");
+        return Alert.alert("Error", "Couldnt Load Your Text Messages", [
+          {
+            text: "Ok",
+            onPress: () => {
+              props.navigation.navigate("MainCategories");
+            },
+          },
+        ]);
       })
       .finally((f) => {
         setisloadingChat((p) => false);
@@ -221,16 +268,17 @@ export default function ChatScreen() {
           return r.json();
         })
         .then((d) => {
-          console.log("status", d);
           if (d.status) {
-            chatMessages.unshift({ ...d.message });
+            console.log("status", d.data[0]);
+            setchatMessages((p) => [...p, d.data[0]]);
+            // sendNotification("Message Received");
+            scrollToBottom();
           }
         })
         .catch((e) => {
           console.log(e);
-          return Alert.alert("An Error Occured Loading Your Messages");
         });
-    }, 5000);
+    }, 2500);
     return () => clearInterval(u);
   }, [inquiryId]); //for RealTime Updates
   useEffect(() => {
@@ -261,7 +309,7 @@ export default function ChatScreen() {
 
       if (!granted)
         return Alert.alert(
-          "You Must Provide Permission To Record Voice Message"
+          "You Must Provide Permission To Record Voice Message.Please Enable Permissions Manually From Settings"
         );
 
       await Audio.setAudioModeAsync({
@@ -274,7 +322,10 @@ export default function ChatScreen() {
       setRecording(recording);
     } catch (e) {
       console.error("Failed to start recording", e);
-      Alert.alert("Error", "An Error Occured");
+      Alert.alert(
+        "Error",
+        "An Error Occured.Please Restart Your App and Contact Us if issue persists"
+      );
     } finally {
     }
   }, [recording, Audio]);
@@ -285,14 +336,16 @@ export default function ChatScreen() {
         await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (!granted || !librarypermission)
         return Alert.alert(
-          "You Must Provide Permissions For Selection of Image"
+          "You Must Provide Permissions For Selection of Image.Please Enable Permissions Manually From Settings."
         );
       const { assets, canceled } = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: "Images",
       });
       if (canceled) return;
       setimage((p) => assets[0].uri);
-    } catch (e) {}
+    } catch (e) {
+      return Alert.alert("Error", "Sorry Couldnt Complete Your Action");
+    }
   }, [image]);
   const sendFileHandler = useCallback(
     async (type) => {
@@ -305,16 +358,20 @@ export default function ChatScreen() {
         iform.append("c_id", uctx.userInfo?.c_id);
         if (messageText) iform.append("question", messageText);
         if (type === "image") {
-          const extension = extname(image);
+          var extension = extname(image);
+          var imgName = `${generateRandomImageName()}.${extension.substring(
+            1
+          )}`;
           iform.append("q_file", {
             uri: image,
-            name: `image.${extension.substring(1)}`,
+            name: imgName,
             type: `image/${extension.substring(1)}`,
           });
         } else if (type === "document") {
+          var documentName = document.name;
           iform.append("q_file", {
             uri: document.uri,
-            name: document.name,
+            name: documentName,
             type: document.mimeType,
           });
         } else if (type === "recording") {
@@ -327,10 +384,11 @@ export default function ChatScreen() {
             duration: getDurationFormatted(status.durationMillis),
             file: recording.getURI(),
           });
+          var soundName = `${generateRandomSoundName()}`;
           setAllrecordings(updatedRecordings);
           iform.append("q_file", {
             uri: recording.getURI(),
-            name: "voice.m4a",
+            name: soundName,
             type: "audio/mp4",
           });
         }
@@ -343,7 +401,22 @@ export default function ChatScreen() {
         if (!r.ok) throw "Error File Upload or Text";
 
         const d = await r.json();
-        console.log(d);
+        if (d.status) {
+          setchatMessages((p) => [
+            ...p,
+            {
+              q_file:
+                (document && documentName) ||
+                (image && imgName) ||
+                (recording && soundName),
+              user: null,
+              qa_desc: messageText,
+              qa_id: `$${Date.now()}${Math.random() * 1000}`,
+              qa_time: generateDate(),
+            },
+          ]);
+        }
+        scrollToBottom();
         if (!d.status) throw "Error File Upload or Text";
       } catch (e) {
         console.log("file upload", e);
@@ -364,6 +437,7 @@ export default function ChatScreen() {
       await recording.stopAndUnloadAsync();
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: false,
+        playsInSilentModeIOS: true,
       });
     } catch (e) {
       console.log("stop recording", e);
@@ -384,9 +458,14 @@ export default function ChatScreen() {
   const selectDocumentPickHandler = useCallback(async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
-        type: ["application/*"], // Set the desired file type(s) here
+        type: [
+          "application/pdf",
+          "application/doc",
+          "application/docx",
+          "application/xlsx",
+        ], // Set the desired file type(s) here
         copyToCacheDirectory: false, // Set to true if you want to copy the file to the app's cache directory
-        multiple: true,
+        multiple: false,
       });
 
       if (result.size > 2048 * 1024)
@@ -412,12 +491,14 @@ export default function ChatScreen() {
   const cancelDocumentHandler = useCallback(() => {
     setdocument((p) => undefined);
   }, [document]);
-
+  const scrollToBottom = useCallback(() => {
+    flatlistRef.current?.scrollToEnd({ animated: true });
+  }, []);
   return (
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === "ios" ? "height" : "padding"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : -290}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 105 : -290}
     >
       <View style={{ flex: 0.95 }}>
         {isloadingChat ? (
@@ -428,9 +509,10 @@ export default function ChatScreen() {
           </View>
         ) : (
           <FlatList
+            ref={flatlistRef}
             data={chatMessages}
             renderItem={({ item }) => <ChatMessage {...item} />}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(item) => item.qa_id}
           />
         )}
       </View>

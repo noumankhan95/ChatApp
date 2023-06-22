@@ -6,11 +6,12 @@ import {
   FlatList,
   ActivityIndicator,
   Button,
-  Alert
+  Alert,
 } from "react-native";
 import SingleCategory from "../components/SingleCategory";
 import SelectLanguage from "../components/SelectLanguage";
-
+import * as Notifications from "expo-notifications";
+import { Asset } from "expo-media-library";
 const MainCategoriesScreen = () => {
   const [Categories, setCategories] = useState();
   const [isloading, setisloading] = useState(false);
@@ -21,6 +22,7 @@ const MainCategoriesScreen = () => {
   const setLanguageChangeModalFalse = useCallback(() => {
     setchangeLanguageTrue((p) => false);
   }, [changeLanguageTrue]);
+
   useEffect(() => {
     setisloading((p) => true);
     fetch("https://tarrhoon.com/Api/categories", {
@@ -33,6 +35,7 @@ const MainCategoriesScreen = () => {
       })
       .then((d) => {
         setCategories((p) => d.data);
+        // sendNotification("Recieved A message");
       })
       .catch((e) => {
         return Alert.alert("Error Occured Try Again");

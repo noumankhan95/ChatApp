@@ -9,7 +9,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     alignSelf: "center",
     marginVertical: 30,
-    borderRadius: 7,
+    borderRadius: 17,
     overflow: "hidden",
   },
 });

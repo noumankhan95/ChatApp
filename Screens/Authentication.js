@@ -12,11 +12,12 @@ import {
   Platform,
 } from "react-native";
 import { useCallback, useEffect, useState } from "react";
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import { useContext } from "react";
 import { Userctx } from "../store/userContext";
 import { useRoute } from "@react-navigation/native";
+
 const Authentication = (props) => {
   const { params } = useRoute();
   const [authMode, setauthMode] = useState(0);
@@ -41,10 +42,10 @@ const Authentication = (props) => {
     try {
       setisloading((p) => true);
       const sform = new FormData();
-
+      const Device_id = await AsyncStorage.getItem("DeviceToken");
       sform.append("c_email", userInfo.email.trim());
       sform.append("c_password", userInfo.password.trim());
-
+      sform.append("device_id", Device_id);
       const r = await fetch("https://tarrhoon.com/Api/login", {
         method: "POST",
         headers: { "Content-Type": "multipart/form-data" },
@@ -53,10 +54,11 @@ const Authentication = (props) => {
       if (!r.ok) throw "An Error Occured";
       const d = await r.json();
       if (d.status) {
-        console.log(d.data);
+        await AsyncStorage.setItem("user", JSON.stringify(d?.data[0]));
         uctx.setuserInfo(d?.data[0]);
         replace("ChatScreen", { ...params });
       }
+      if (!d.status) throw d.message;
     } catch (e) {
       console.log(e);
       Alert.alert(
@@ -72,13 +74,14 @@ const Authentication = (props) => {
       setisloading((p) => true);
 
       console.log(userInfo);
-
+      const DeviceToken = await AsyncStorage.getItem("DeviceToken");
       const sform = new FormData();
       sform.append("c_name", userInfo.name.trim());
       sform.append("c_email", userInfo.email.trim());
       sform.append("c_password", userInfo.password.trim());
       sform.append("c_contact", userInfo.contact.trim());
       sform.append("c_address", userInfo.address.trim());
+      sform.append("c_deviceToken", DeviceToken || "");
       const r = await fetch("https://tarrhoon.com/Api/customerRegistration", {
         method: "POST",
         headers: { "Content-Type": "multipart/form-data" },
@@ -155,7 +158,7 @@ const Authentication = (props) => {
           }}
         >
           <Image
-            source={require("../assets/splashlogo.png")}
+            source={require("../assets/Group6.png")}
             style={{
               flex: 0.3,
               resizeMode: "contain",
@@ -173,7 +176,7 @@ const Authentication = (props) => {
             >
               <Text style={styles.text}>Enter Name</Text>
               <TextInput
-                placeholder={"Enter Name"}
+                // placeholder={"Enter Name"}
                 value={userInfo.name}
                 onChangeText={ChangeInputHandler.bind(null, "name")}
                 style={styles.input}
@@ -181,7 +184,7 @@ const Authentication = (props) => {
               <Text style={styles.text}>Enter Contact Number</Text>
 
               <TextInput
-                placeholder={"Enter Contact"}
+                // placeholder={"Enter Contact"}
                 value={userInfo.contact}
                 onChangeText={ChangeInputHandler.bind(null, "contact")}
                 style={styles.input}
@@ -189,21 +192,21 @@ const Authentication = (props) => {
               <Text style={styles.text}>Enter Address</Text>
 
               <TextInput
-                placeholder={"Enter Address"}
+                // placeholder={"Enter Address"}
                 value={userInfo.address}
                 onChangeText={ChangeInputHandler.bind(null, "address")}
                 style={styles.input}
               />
               <Text style={styles.text}>Enter Email</Text>
               <TextInput
-                placeholder={"Enter Email"}
+                // placeholder={"Enter Email"}
                 value={userInfo.email}
                 onChangeText={ChangeInputHandler.bind(null, "email")}
                 style={styles.input}
               />
               <Text style={styles.text}>Enter Password</Text>
               <TextInput
-                placeholder={"Enter Password"}
+                // placeholder={"Enter Password"}
                 secureTextEntry
                 value={userInfo.password}
                 onChangeText={ChangeInputHandler.bind(null, "password")}
@@ -222,7 +225,7 @@ const Authentication = (props) => {
               <Text style={styles.text}>Enter Email</Text>
 
               <TextInput
-                placeholder={"Enter Email"}
+                // placeholder={"Enter Email"}
                 value={userInfo.email}
                 onChangeText={ChangeInputHandler.bind(null, "email")}
                 style={styles.input}
@@ -230,7 +233,7 @@ const Authentication = (props) => {
               <Text style={styles.text}>Enter Password</Text>
 
               <TextInput
-                placeholder={"Enter Password"}
+                // placeholder={"Enter Password"}
                 secureTextEntry
                 value={userInfo.password}
                 onChangeText={ChangeInputHandler.bind(null, "password")}
@@ -252,11 +255,9 @@ const Authentication = (props) => {
                 backgroundColor: "blue",
                 borderRadius: 8,
               }}
+              onPress={authMode === 0 ? SignupHandler : LoginHandler}
             >
-              <Text
-                onPress={authMode === 0 ? SignupHandler : LoginHandler}
-                style={{ fontSize: 20, color: "white" }}
-              >
+              <Text style={{ fontSize: 20, color: "white" }}>
                 {authMode === 0 ? "Sign Up" : "Login"}
               </Text>
             </TouchableOpacity>

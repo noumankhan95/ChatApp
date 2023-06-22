@@ -15,14 +15,16 @@ import SingleCategoryScreen from "./SingleCategoryScreen";
 import ServiceScreen from "./ServiceDetailScreen";
 import ChatScreen from "./ChatScreen";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useLayoutEffect, useContext } from "react";
 import Authentication from "./Authentication";
 import NetInfo from "@react-native-community/netinfo";
+import { Userctx } from "../store/userContext";
 
 const Home = (props) => {
   const Stack = createNativeStackNavigator();
-  const [showAboutScreen, setShowAboutScreen] = useState(false);
+  const [showAboutScreen, setShowAboutScreen] = useState(true);
   const [isConnected, setisConnected] = useState();
+  const uctx = useContext(Userctx);
   useEffect(() => {
     const checkInternetConnection = async () => {
       const netInfoState = await NetInfo.fetch();
@@ -40,17 +42,44 @@ const Home = (props) => {
       unsubscribe();
     };
   }, []);
-
-  useEffect(() => {
+  // useLayoutEffect(() => {
+  //   AsyncStorage.removeItem("aboutScreenShown", () => {
+  //     console.log("removed");
+  //     setShowAboutScreen(true);
+  //   });
+  //   AsyncStorage.removeItem("user", () => {
+  //     console.log("removed user");
+  //   });
+  //   AsyncStorage.removeItem("DeviceToken", () => {
+  //     console.log("removed token");
+  //   });
+  // }, []);
+  useLayoutEffect(() => {
+    AsyncStorage.getItem("user")
+      .then((value) => {
+        if (value === null) {
+        } else {
+          const data = JSON.parse(value);
+          uctx.setuserInfo(data);
+        }
+      })
+      .catch((error) => {
+        console.log("Error retrieving local storage value:", error);
+      });
+  }, []);
+  useLayoutEffect(() => {
     // Check local storage value to determine if the "About" screen has been shown before
+
     AsyncStorage.getItem("aboutScreenShown")
       .then((value) => {
+        console.log(value);
         if (value === null) {
           // If the value is null, it means the "About" screen has not been shown before
           setShowAboutScreen(true);
           // Update local storage value to indicate that the "About" screen has been shown
           AsyncStorage.setItem("aboutScreenShown", "true");
         } else {
+          console.log("Available");
           setShowAboutScreen(false);
         }
       })

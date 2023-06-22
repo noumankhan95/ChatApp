@@ -1,5 +1,5 @@
 import { Entypo } from "@expo/vector-icons";
-import { TouchableOpacity, Text } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useCallback } from "react";
 import { useContext } from "react";
@@ -33,15 +33,20 @@ const ChatIcon = (props) => {
         width: "100%",
         alignItems: "flex-end",
         paddingHorizontal: 20,
+        overflow: "hidden",
       }}
       onPress={navigateTochat}
     >
-      <Entypo
-        name="chat"
-        size={54}
-        color="rgba(115,105,239,255)"
-        style={{ backgroundColor: "white", padding: 20, borderRadius: 50 }}
-      />
+      <View
+        style={{
+          backgroundColor: "white",
+          padding: 20,
+          borderRadius: 50,
+          overflow: "hidden", // Ensure the content is clipped to the border radius
+        }}
+      >
+        <Entypo name="chat" size={54} color="rgba(115,105,239,255)" />
+      </View>
     </TouchableOpacity>
   );
 };

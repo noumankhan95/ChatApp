@@ -1,40 +1,81 @@
 {
   "expo": {
-    "name": "social_assistance",
+    "name": "Tarrhoon",
     "slug": "social_assistance",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/appicon.png",
     "userInterfaceStyle": "light",
+    "notification": {
+      "icon": "./assets/appicon.png"
+    },
     "splash": {
       "image": "./assets/splash.png",
-      "resizeMode": "cover",
-      "backgroundColor": "#ffffff"
+      "resizeMode": "cover"
     },
     "plugins": [
       [
+        "expo-notifications",
+        {
+          "icon": "./assets/splashlogo.png",
+          "color": "#ffffff"
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow Social Assistance to access your photos.",
+          "savePhotosPermission": "Allow Social Assistance to save photos.",
+          "isAccessMediaLocationEnabled": true
+        }
+      ],
+      [
         "expo-image-picker",
         {
-          "photosPermission": "The app accesses your photos to let you share them with your friends."
+          "photosPermission": "The app accesses your photos to let you share them With the Admin"
+        }
+      ],
+      [
+        "expo-av",
+        {
+          "microphonePermission": "Allow App to access your microphone."
         }
       ]
     ],
     "assetBundlePatterns": ["**/*"],
     "ios": {
+      "icon": "./assets/simpleicon.png",
       "supportsTablet": true,
       "infoPlist": {
-        "UIBackgroundModes": ["audio"]
-      }
+        "UIBackgroundModes": ["audio"],
+        "NSPhotoLibraryUsageDescription": "Allow Social Assistance to access your photos.",
+        "NSPhotoLibraryAddUsageDescription": "Allow Social Assistance to save photos."
+      },
+      "bundleIdentifier": "com.muhammad1700.social-assistance"
     },
     "android": {
+      "icon": "./assets/simpleicon.png",
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      }
+        "foregroundImage": "./assets/appicon.png",
+        "backgroundColor": "#7369ef"
+      },
+      "package": "com.muhammad1700.social_assistance",
+      "permissions": [
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.ACCESS_MEDIA_LOCATION",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "permissions": ["INTERNET"]
+    "extra": {
+      "eas": {
+        "projectId": "ac4a3de0-a120-498b-901c-0d3c4c4968e9"
+      }
+    }
   }
 }

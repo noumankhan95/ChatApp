@@ -15,20 +15,20 @@ const languages = [
   {
     id: 2,
     language: "Pashto",
-    image: require("../assets/urdu.png"),
-    value: "pr",
+    image: require("../assets/ur.png"),
+    value: "ur",
   },
   {
     id: 3,
     language: "Persian",
     image: require("../assets/persian.png"),
-    value: "persian",
+    value: "pr",
   },
 ];
 const SelectLanguage = (props) => {
   const [selectedOptions, setselectedOption] = useState();
   const { language, setlanguage } = useContext(langContext);
-  const { navigate } = useNavigation();
+  const { navigate, replace } = useNavigation();
   const setoption = useCallback(
     (val) => {
       setselectedOption((p) => val);
@@ -44,7 +44,7 @@ const SelectLanguage = (props) => {
         "Please Select A Language To Continue"
       );
     }
-    navigate("MainCategories");
+    replace("MainCategories");
   }, [language]);
 
   return (
@@ -54,9 +54,10 @@ const SelectLanguage = (props) => {
           style={{
             width: "100%",
             backgroundColor: "rgba(128, 128, 128, 0.4)",
-            height: 55,
+
             justifyContent: "center",
-            padding: 5,
+            padding: 20,
+            paddingHorizontal: 10,
           }}
         >
           <Text style={{ fontSize: 25 }}>Please Select A Language</Text>
@@ -71,6 +72,8 @@ const SelectLanguage = (props) => {
               justifyContent: "space-between",
               marginVertical: 15,
               paddingHorizontal: 5,
+              alignItems: "center",
+              paddingHorizontal: 20,
             }}
           >
             <Text>{l.language}</Text>
@@ -80,13 +83,23 @@ const SelectLanguage = (props) => {
                 justifyContent: "space-between",
                 alignItems: "center",
                 width: "40%",
+                overflow: "hidden",
               }}
             >
               <Image source={l.image} />
-              <RadioButton
+              <RadioButton.Item
                 value={l.value}
                 status={selectedOptions === l.value ? "checked" : "unchecked"}
                 onPress={setoption.bind(null, l.value)}
+                color="orange"
+                uncheckedColor="gray"
+                theme={{ mode: "adaptive" }}
+                style={{
+                  borderWidth: 0.2,
+                  borderColor: "gray",
+                  borderRadius: 10,
+                  overflow: "hidden",
+                }}
               />
             </View>
           </TouchableOpacity>
@@ -98,7 +111,7 @@ const SelectLanguage = (props) => {
               marginVertical: 10,
               backgroundColor: "rgba(115,105,239,255)",
               marginHorizontal: 10,
-              padding: 15,
+              padding: 10,
               borderRadius: 15,
             }}
             onPress={movetoCategories}

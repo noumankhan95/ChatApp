@@ -1,0 +1,47 @@
+ {
+  "project_info": {
+    "project_number": "620288207385",
+    "project_id": "tarrhoon",
+    "storage_bucket": "tarrhoon.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:620288207385:android:32762664d540d7dce85888",
+        "android_client_info": {
+          "package_name": "com.muhammad1700.social_assistance"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "620288207385-s2895cqhm1o0isp5qdnhdl1k15i6k0po.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.muhammad1700.social_assistance",
+            "certificate_hash": "2a6442eb379b80abd6e861a27d017763fafb141e"
+          }
+        },
+        {
+          "client_id": "620288207385-frav1tt81kv5soi9i00m20fmltqt8hj7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCCvwc7nxGXavW33NM13EpSSdgRx50aLGo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "620288207385-frav1tt81kv5soi9i00m20fmltqt8hj7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

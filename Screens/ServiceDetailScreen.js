@@ -1,14 +1,26 @@
-import { View, Text, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Button,
+  TouchableOpacity,
+} from "react-native";
 import ChatIcon from "../components/ChatIcon";
 import Modal from "../components/Modal";
 import { useRoute } from "@react-navigation/native";
+import HandlePayment from "../components/HandlePayment";
 export default function ServiceScreen() {
   const { params } = useRoute();
   const { data } = params;
 
   return (
-    <View
-      style={{ flex: 1, justifyContent: "space-between", paddingBottom: 10 }}
+    <ScrollView
+      contentContainerStyle={{
+        justifyContent: "space-between",
+        paddingBottom: 10,
+      }}
+      style={{ flexGrow: 1 }}
     >
       <View>
         <Modal>
@@ -38,9 +50,33 @@ export default function ServiceScreen() {
           </View>
         </Modal>
       </View>
+      <TouchableOpacity style={styles.payButton}>
+        <Text
+          style={{
+            color: "black",
+            textAlign: "center",
+          }}
+        >
+          Pay With Paypal
+        </Text>
+      </TouchableOpacity>
+      <HandlePayment />
+
       <ChatIcon data={data[0]} />
-    </View>
+    </ScrollView>
   );
 }
 
-const styles = StyleSheet.create({ text: { color: "rgba(115,105,239,255)" } });
+const styles = StyleSheet.create({
+  text: { color: "rgba(115,105,239,255)" },
+  payButton: {
+    backgroundColor: "orange",
+    padding: 15,
+    alignSelf: "center",
+    width: "20%",
+    height: "10%",
+    borderRadius: 5,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+});

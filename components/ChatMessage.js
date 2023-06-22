@@ -8,7 +8,7 @@ import {
   Alert,
   ToastAndroid,
 } from "react-native";
-import { useCallback, useContext, useState } from "react";
+import React, { useCallback, useContext, useState } from "react";
 import { Userctx } from "../store/userContext";
 import { Audio } from "expo-av";
 import { extname } from "path";
@@ -21,16 +21,20 @@ const ShowFileType = (ftype, isUser) => {
   const [isloadingFile, setisloadingFile] = useState(false);
   const [isSoundFinished, setisSoundFinished] = useState(true);
   const [isloadingDocument, setisloadingDocument] = useState(false);
+  const [isloadingAudio, setisloadingAudio] = useState(false);
   const playAudioFromUri = useCallback(
     async (ftype) => {
       try {
         setisSoundFinished((p) => false);
+        setisloadingAudio((p) => true);
         const soundUri = `https://tarrhoon.com/uploads/queries/${ftype}`;
         const soundObject = new Audio.Sound();
         await soundObject.loadAsync({ uri: soundUri });
         await soundObject.playAsync();
+
         setisSoundFinished((p) => false);
         soundObject.setOnPlaybackStatusUpdate((status) => {
+          if (status.isPlaying) setisloadingAudio((p) => false);
           if (status.didJustFinish) {
             // Audio playback has finished
             console.log("Audio playback finished");
@@ -45,7 +49,7 @@ const ShowFileType = (ftype, isUser) => {
         return Alert.alert("Couldn't play audio");
       }
     },
-    [isloadingFile, isSoundFinished]
+    [isloadingFile, isSoundFinished, isloadingAudio]
   );
 
   const saveDocumentToAppFolder = useCallback(
@@ -103,7 +107,7 @@ const ShowFileType = (ftype, isUser) => {
     case ".jpeg":
       return (
         <TouchableOpacity
-          style={[{ height: 170 }, !isUser && { width: 230 }]}
+          style={[{ height: 170, width: 240 }, !isUser && { width: 230 }]}
           onPress={!isloadingFile ? saveToGallery.bind(null, ftype) : null}
         >
           {isloadingFile && (
@@ -133,6 +137,7 @@ const ShowFileType = (ftype, isUser) => {
     case ".wmv":
     case ".mp3":
     case ".m4a":
+    case ".wav":
       return (
         <TouchableOpacity
           style={[
@@ -140,18 +145,34 @@ const ShowFileType = (ftype, isUser) => {
               flexDirection: "row",
               justifyContent: "space-around",
               alignItems: "center",
+              width: 100,
             },
-            !isUser && { width: 100 },
+            !isUser && {
+              width: 120,
+            },
           ]}
         >
-          <Ionicons
-            name={isSoundFinished ? "play" : "pause"}
-            size={30}
-            color={"gold"}
-            onPress={
-              isSoundFinished ? playAudioFromUri.bind(null, ftype) : null
-            }
-          />
+          {isloadingAudio ? (
+            <ActivityIndicator
+              size={30}
+              color={"rgba(115,105,239,255)"}
+              style={{
+                justifyContent: "center",
+                alignItems: "center",
+                zIndex: 1,
+              }}
+            />
+          ) : (
+            <Ionicons
+              name={isSoundFinished ? "play" : "pause"}
+              size={30}
+              color={"gold"}
+              onPress={
+                isSoundFinished ? playAudioFromUri.bind(null, ftype) : null
+              }
+            />
+          )}
+
           <Text
             style={[
               !isUser && {
@@ -197,24 +218,24 @@ const ShowFileType = (ftype, isUser) => {
       );
   }
 };
-export default function ChatMessage(props) {
+const ChatMessage = React.memo((props) => {
   const { userInfo } = useContext(Userctx);
-  console.log(props.q_file);
+
   return (
     <View
       style={{
-        width: 400,
-
+        width: "100%",
         marginVertical: 2,
         justifyContent: "flex-start",
+        paddingHorizontal: 13,
       }}
     >
       <Text
         style={[
-          { fontSize: 19, color: "darkorchid", marginLeft: 20 },
+          { fontSize: 19, color: "darkorchid" },
           !props.user && {
             alignSelf: "flex-end",
-            marginRight: 22,
+            // marginRight: 22,
           },
         ]}
       >
@@ -227,6 +248,7 @@ export default function ChatMessage(props) {
           !props.user && {
             alignSelf: "flex-end",
             backgroundColor: "mediumpurple",
+            // maxWidth: 280,
           },
         ]}
       >
@@ -235,26 +257,39 @@ export default function ChatMessage(props) {
           style={[
             !props.user && {
               color: "white",
+              paddingBottom: 10,
             },
           ]}
         >
           {props.qa_desc}
         </Text>
+        <Text
+          style={[
+            { alignSelf: "flex-end", fontSize: 17, fontWeight: "500" },
+            !props.user && {
+              color: "white",
+            },
+          ]}
+        >
+          {props.qa_time}
+        </Text>
       </View>
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {
-    minWidth: 60,
-    maxWidth: 280,
+    maxWidth: 250,
     padding: 10,
-    marginHorizontal: 5,
+    // marginHorizontal: 5,
     borderRadius: 10,
     backgroundColor: "sandybrown",
+    alignSelf: "flex-start",
   },
   text: {
     textDecorationLine: "underline",
   },
 });
+
+export default React.memo(ChatMessage);

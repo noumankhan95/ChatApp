@@ -7,21 +7,20 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useWindowDimensions } from "react-native";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useRef, useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
-import Modal from "../components/Modal";
 import SelectLanguage from "../components/SelectLanguage";
 const aboutData = [
   {
     id: 1,
-    text: "About to Facilitate You and Perform your Daily Tasks digitally in France.Free Chat to communicate with one of our agentsto solve your problem remotely within an hour.eliminate your waiting time for your social assistant,to provide hands on digital assistance.We can offer the following services, \n -Online Appointments ,Making or Updating Cv or Resume ,Filling all of your forms,Translation of your documents (Tazkeera,Asylum Cases)etc,Help To Open Food Delivery Accounts(Uber Eats,Deliveroo,Just Eat etc),Searching and Applying for jobs -Pakistan And Iran Visa Application",
+    text: "To Facilitate You and Perform your Daily  Tasks digitally in France. Free Chat with one of our agents to  solve your problem remotely within an hour and eliminate your waiting time for your social assistant.",
     img: require("../assets/about_logo.png"),
     imgstyle: "img1style",
   },
   {
     id: 2,
     // text: "Hello,Please Select A Language",
-    img: require("../assets/splashlogo.png"),
+    img: require("../assets/Group6.png"),
     imgstyle: "img2style",
     modal: true,
   },
@@ -56,16 +55,24 @@ const AboutScreen = () => {
         style={{ flex: 0.8 }}
         data={aboutData}
         renderItem={({ item }) => (
-          <View style={[{}, { width }]}>
+          <View style={[{ flex: 1 }, { width }]}>
             <Image source={item.img} style={styles[item.imgstyle]} />
             {item.text && (
-              <View style={[{ paddingHorizontal: 10, marginVertical: 10 }]}>
+              <View
+                style={[
+                  {
+                    paddingHorizontal: 10,
+                    marginVertical: 10,
+                    alignSelf: "flex-start",
+                  },
+                ]}
+              >
                 <Text style={[{ fontSize: 18, color: "white" }]}>
                   {item.text}
                 </Text>
               </View>
             )}
-            {item.modal && <SelectLanguage />}
+            {item.modal && <SelectLanguage showNext={true} />}
           </View>
         )}
         pagingEnabled
@@ -138,10 +145,10 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
   },
-  img1style: { width: "100%", height: 360, resizeMode: "contain" },
+  img1style: { width: "100%", flex: 1, resizeMode: "contain" },
   img2style: {
     width: "100%",
-    height: 200,
+    flex: 1,
     resizeMode: "contain",
     marginTop: 50,
   },
